@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MakeIt Digital — Quotation Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0B0F14;
+      --lime: #C8F135;
+      --mist: #E4E8DD;
+      --paper: #F6F7F3;
+      --white: #FFFFFF;
+      --border: #C9CFC0;
+      --muted: #525B66;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--mist);
+      background-image: radial-gradient(#BFC6B5 1.25px, transparent 1.25px);
+      background-size: 20px 20px;
+      color: var(--ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, .brand-display {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    /* Top Control Bar (Hidden on Print) */
+    .topbar {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1.5px solid var(--ink);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .topbar-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border: 1px solid #2A323D;
+      border-radius: 6px;
+      color: #A9B2BE;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #2A323D;
+      background: transparent;
+      color: var(--paper);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .btn:hover {
+      background: #18202B;
+      border-color: #465263;
+    }
+
+    /* Single Lime signal on Ink per layout */
+    .btn-lime {
+      background: var(--lime);
+      color: var(--ink);
+      border-color: var(--lime);
+      font-weight: 600;
+    }
+
+    .btn-lime:hover {
+      background: #bce625;
+      border-color: #bce625;
+    }
+
+    .btn-paper {
+      background: var(--paper);
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+    }
+
+    .btn-paper:hover {
+      background: var(--mist);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* Workspace Layout */
+    .workspace {
+      max-width: 1280px;
+      margin: 24px auto;
+      padding: 0 20px 60px;
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Sidebar Controls */
+    .sidebar {
+      background: var(--paper);
+      border: 1.5px solid var(--ink);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 76px;
+    }
+
+    .sidebar-section {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    .sidebar-section:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .sidebar-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-group label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    select, input[type="number"], input[type="text"], input[type="date"] {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      width: 100%;
+      outline: none;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--ink);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 4px 0;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--ink);
+      cursor: pointer;
+    }
+
+    /* Quick Preset Catalog in Sidebar */
+    .preset-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .preset-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .preset-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .preset-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preset-price-edit {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .preset-price-edit input {
+      width: 74px;
+      padding: 2px 5px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    /* A4 Quotation Paper Sheet */
+    .sheet-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .edit-hint {
+      font-size: 12px;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      padding: 6px 12px;
+      margin-bottom: 12px;
+      width: 100%;
+      max-width: 210mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .quotation-sheet {
+      width: 100%;
+      max-width: 210mm;
+      min-height: 297mm;
+      background: var(--paper);
+      border: 1.5px solid var(--ink);
+      padding: 16mm 16mm 14mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Editable Text Styling */
+    [contenteditable="true"] {
+      outline: none;
+      border-radius: 4px;
+      transition: background 0.1s ease;
+    }
+
+    [contenteditable="true"]:hover {
+      background: rgba(11, 15, 20, 0.045);
+    }
+
+    [contenteditable="true"]:focus {
+      background: var(--white);
+      box-shadow: 0 0 0 1.5px var(--ink);
+    }
+
+    /* Header Section */
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1.5px solid var(--ink);
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+
+    .brand-tagline {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .company-meta {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ink);
+      max-width: 320px;
+    }
+
+    .doc-meta-box {
+      text-align: right;
+      min-width: 220px;
+    }
+
+    .doc-type-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .meta-table {
+      margin-left: auto;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .meta-table td {
+      padding: 3px 0;
+    }
+
+    .meta-table td:first-child {
+      color: var(--muted);
+      padding-right: 12px;
+      font-weight: 500;
+    }
+
+    .meta-table td:last-child {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* Client & Project Scope Grid */
+    .parties-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-kicker {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .client-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .client-details {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .scope-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .scope-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .scope-desc {
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    /* Deliverables Line Items Table */
+    .items-section {
+      padding: 18px 0;
+    }
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .items-table thead th {
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 9px 10px;
+      text-align: left;
+    }
+
+    .items-table thead th:first-child {
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      width: 34px;
+      text-align: center;
+    }
+
+    .items-table thead th:last-child {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    .items-table thead th.num,
+    .items-table tbody td.num {
+      text-align: right;
+    }
+
+    .items-table thead th.center,
+    .items-table tbody td.center {
+      text-align: center;
+    }
+
+    .items-table tbody tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .items-table tbody td {
+      padding: 10px 8px;
+      vertical-align: top;
+    }
+
+    .item-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .item-desc {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Editable numeric cells inside table */
+    .cell-input {
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 6px;
+      width: 100%;
+    }
+
+    .cell-input.num-input {
+      text-align: right;
+    }
+
+    .cell-input.center-input {
+      text-align: center;
+    }
+
+    .price-cell-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0 6px;
+    }
+
+    .price-cell-wrap:focus-within {
+      border-color: var(--ink);
+    }
+
+    .price-prefix {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-right: 3px;
+      user-select: none;
+    }
+
+    .price-cell-wrap input {
+      border: none;
+      background: transparent;
+      padding: 4px 0;
+      text-align: right;
+      font-weight: 600;
+      font-size: 12.5px;
+      width: 82px;
+    }
+
+    .line-total {
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      padding-top: 5px;
+      display: inline-block;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      padding-top: 3px;
+    }
+
+    .icon-btn {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--ink);
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:hover {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    .table-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    /* Totals & Payment Schedule */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      padding-top: 10px;
+      align-items: start;
+    }
+
+    .payment-box {
+      border: 1px solid var(--border);
+      background: var(--white);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+
+    .milestone-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .milestone-row:last-child {
+      border-bottom: none;
+    }
+
+    .totals-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .totals-table td {
+      padding: 6px 8px;
+    }
+
+    .totals-table td:first-child {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .totals-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .totals-table tr.grand-total td {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 10px 12px;
+    }
+
+    .totals-table tr.grand-total td:first-child {
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      color: var(--paper);
+    }
+
+    .totals-table tr.grand-total td:last-child {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    /* Footer: Terms, Bank & Signatory */
+    .doc-footer {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1.5px solid var(--ink);
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+
+    .terms-list {
+      padding-left: 16px;
+      color: var(--ink);
+    }
+
+    .terms-list li {
+      margin-bottom: 3px;
+    }
+
+    .signatory-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: right;
+    }
+
+    .sign-line {
+      margin-top: 34px;
+      padding-top: 6px;
+      border-top: 1px solid var(--ink);
+      display: inline-block;
+      min-width: 180px;
+      margin-left: auto;
+    }
+
+    /* Modal for Preset Catalog Manager */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 20, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--paper);
+      border: 1.5px solid var(--ink);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .catalog-row {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1.4fr 0.7fr 0.8fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .catalog-row textarea {
+      grid-column: 1 / -1;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 7px;
+      resize: vertical;
+      min-height: 38px;
+    }
+
+    /* Print Styles */
+    @media print {
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+
+      body {
+        background: var(--white) !important;
+        background-image: none !important;
+      }
+
+      .topbar,
+      .sidebar,
+      .edit-hint,
+      .table-toolbar,
+      .no-print,
+      .modal-backdrop {
+        display: none !important;
+      }
+
+      .workspace {
+        display: block;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .quotation-sheet {
+        border: none;
+        max-width: 100%;
+        min-height: auto;
+        padding: 0;
+        background: var(--paper) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .cell-input,
+      .price-cell-wrap {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+
+      .price-cell-wrap input {
+        width: auto;
+        max-width: 78px;
+      }
+
+      [contenteditable="true"]:hover,
+      [contenteditable="true"]:focus {
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar (Single Lime Signal on Ink) -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="44" height="44" rx="11" fill="#C8F135" />
+        <path d="M16 32L32 16M32 16H19M32 16V29" stroke="#0B0F14" stroke-width="4.5" stroke-linecap="square" stroke-linejoin="miter" />
+      </svg>
+      <div>
+        <div class="topbar-title">MakeIt Digital — Quotation Studio</div>
+      </div>
+      <span class="topbar-badge" id="saveStatus">Saved locally</span>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="btn" onclick="createNewQuotation()">+ New Quote</button>
+      <button class="btn" onclick="exportJSON()">Export JSON</button>
+      <label class="btn" style="cursor:pointer;">
+        Import JSON
+        <input type="file" accept=".json" onchange="importJSON(event)" style="display:none;" />
+      </label>
+      <button class="btn" onclick="resetToDefault()">Reset Demo</button>
+      <button class="btn btn-lime" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- Left Settings & Editable Deliverable Presets Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Currency &amp; Tax Settings</div>
+        <div class="control-grid">
+          <div class="field-group">
+            <label for="currencySelect">Currency</label>
+            <select id="currencySelect" onchange="updateSettings()">
+              <option value="INR|₹">INR (₹)</option>
+              <option value="USD|$">USD ($)</option>
+              <option value="EUR|€">EUR (€)</option>
+              <option value="GBP|£">GBP (£)</option>
+              <option value="AED|AED ">AED</option>
+              <option value="SGD|S$">SGD (S$)</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="taxRateInput">Tax / GST (%)</label>
+            <input type="number" id="taxRateInput" min="0" max="100" step="0.5" value="18" oninput="updateSettings()" />
+          </div>
+        </div>
+
+        <div class="toggle-row" style="margin-top:10px;">
+          <span>Show Tax / GST Row</span>
+          <input type="checkbox" id="showTaxToggle" checked onchange="updateSettings()" />
+        </div>
+
+        <div class="control-grid" style="margin-top:8px;">
+          <div class="field-group">
+            <label for="discountType">Discount Type</label>
+            <select id="discountType" onchange="updateSettings()">
+              <option value="percent">Percent (%)</option>
+              <option value="flat">Flat Amount</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="discountValue">Discount Value</label>
+            <input type="number" id="discountValue" min="0" step="any" value="0" oninput="updateSettings()" />
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Payment Split (%)</div>
+        <div class="control-grid">
+          <div class="field-group">
+            <label for="advancePct">Advance (%)</label>
+            <input type="number" id="advancePct" min="0" max="100" value="50" oninput="updateSettings()" />
+          </div>
+          <div class="field-group">
+            <label for="milestonePct">Milestone (%)</label>
+            <input type="number" id="milestonePct" min="0" max="100" value="30" oninput="updateSettings()" />
+          </div>
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">
+          Final Handover Balance: <strong id="finalPctLabel">20%</strong> (auto-calculated)
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">
+          <span>Deliverable Presets</span>
+          <button class="btn btn-paper btn-sm" onclick="openCatalogModal()">Edit Catalog</button>
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">
+          Edit default prices below or click <strong>+ Add</strong> to insert into your quote.
+        </div>
+        <div class="preset-list" id="presetSidebarList"></div>
+      </div>
+    </aside>
+
+    <!-- Main Editable Quotation Document -->
+    <section class="sheet-wrapper">
+      <div class="edit-hint">
+        <span>Click any text, unit, quantity, or deliverable price on the sheet below to edit directly.</span>
+        <strong id="docCodeBadge">QT-2026-001</strong>
+      </div>
+
+      <article class="quotation-sheet" id="quotationSheet">
+        <div>
+          <!-- Document Header -->
+          <header class="doc-header">
+            <div>
+              <div class="brand-lockup">
+                <!-- MakeIt Digital Geometric Mark: 25% corner radius, 45° arrow, flat Ink on Paper -->
+                <svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-label="MakeIt Digital Mark">
+                  <rect x="2" y="2" width="44" height="44" rx="11" stroke="#0B0F14" stroke-width="4" />
+                  <path d="M16 32L32 16M32 16H19M32 16V29" stroke="#0B0F14" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter" />
+                </svg>
+                <div>
+                  <div class="brand-name" contenteditable="true" data-field="companyName">MakeIt Digital</div>
+                  <div class="brand-tagline" contenteditable="true" data-field="companyTagline">You Idea It. We MakeIt.</div>
+                </div>
+              </div>
+              <div class="company-meta" contenteditable="true" data-field="companyAddress">
+                Websites &amp; Apps, Designed and Built End to End<br />
+                Kerala, India • hello@makeitdigital.in • +91 98765 43210<br />
+                GSTIN / Tax ID: 32AABCM1234F1Z5
+              </div>
+            </div>
+
+            <div class="doc-meta-box">
+              <div class="doc-type-title" contenteditable="true" data-field="docTitle">QUOTATION</div>
+              <table class="meta-table">
+                <tr>
+                  <td>Quote No:</td>
+                  <td contenteditable="true" data-field="quoteNumber" oninput="syncQuoteCode(this.innerText)">QT-2026-001</td>
+                </tr>
+                <tr>
+                  <td>Issue Date:</td>
+                  <td contenteditable="true" data-field="issueDate">16 Nov 2026</td>
+                </tr>
+                <tr>
+                  <td>Valid Until:</td>
+                  <td contenteditable="true" data-field="validUntil">30 Nov 2026</td>
+                </tr>
+                <tr>
+                  <td>Timeline:</td>
+                  <td contenteditable="true" data-field="timeline">4 – 6 Weeks</td>
+                </tr>
+              </table>
+            </div>
+          </header>
+
+          <!-- Prepared For & Project Scope -->
+          <section class="parties-grid">
+            <div>
+              <div class="section-kicker">Prepared For</div>
+              <div class="client-name" contenteditable="true" data-field="clientName">Client Company / Name</div>
+              <div class="client-details" contenteditable="true" data-field="clientDetails">
+                Attn: Project Stakeholder<br />
+                Address Line, City, State, PIN<br />
+                client@company.com • +91 90000 00000<br />
+                Client Tax / GST ID: Optional
+              </div>
+            </div>
+
+            <div class="scope-box">
+              <div class="section-kicker">Project Summary</div>
+              <div class="scope-title" contenteditable="true" data-field="projectTitle">Custom Web &amp; Mobile Application Build</div>
+              <div class="scope-desc" contenteditable="true" data-field="projectSummary">
+                End-to-end UI/UX design, full-stack development, responsive deployment, and post-launch handover built cleanly to specification.
+              </div>
+            </div>
+          </section>
+
+          <!-- Deliverables & Pricing Table -->
+          <section class="items-section">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Deliverable &amp; Scope</th>
+                  <th class="center" style="width:76px;">Unit</th>
+                  <th class="num" style="width:66px;">Qty</th>
+                  <th class="num" style="width:118px;">Unit Price</th>
+                  <th class="num" style="width:114px;">Amount</th>
+                  <th class="center no-print" style="width:58px;">Edit</th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody"></tbody>
+            </table>
+
+            <div class="table-toolbar no-print">
+              <button class="btn btn-paper btn-sm" onclick="addBlankItem()">+ Add Deliverable Row</button>
+              <button class="btn btn-paper btn-sm" onclick="openCatalogModal()">+ Insert From Presets</button>
+            </div>
+          </section>
+
+          <!-- Payment Schedule & Totals -->
+          <section class="summary-grid">
+            <div class="payment-box">
+              <div class="section-kicker" style="margin-bottom:8px;">Payment Schedule</div>
+              <div class="milestone-row">
+                <span contenteditable="true" data-field="milestone1Label">1. Project Kickoff Advance (<span id="advPctText">50</span>%)</span>
+                <strong id="milestone1Amt">₹0.00</strong>
+              </div>
+              <div class="milestone-row">
+                <span contenteditable="true" data-field="milestone2Label">2. Design &amp; Core Build Review (<span id="midPctText">30</span>%)</span>
+                <strong id="milestone2Amt">₹0.00</strong>
+              </div>
+              <div class="milestone-row">
+                <span contenteditable="true" data-field="milestone3Label">3. Final Launch &amp; Handover (<span id="finPctText">20</span>%)</span>
+                <strong id="milestone3Amt">₹0.00</strong>
+              </div>
+            </div>
+
+            <div>
+              <table class="totals-table">
+                <tr>
+                  <td>Subtotal</td>
+                  <td id="subtotalAmt">₹0.00</td>
+                </tr>
+                <tr id="discountRow">
+                  <td id="discountLabel">Discount</td>
+                  <td id="discountAmt">-₹0.00</td>
+                </tr>
+                <tr id="taxRow">
+                  <td id="taxLabel">GST / Tax (18%)</td>
+                  <td id="taxAmt">₹0.00</td>
+                </tr>
+                <tr class="grand-total">
+                  <td>Total Quote</td>
+                  <td id="grandTotalAmt">₹0.00</td>
+                </tr>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- Terms, Payment Details & Signatory -->
+        <footer class="doc-footer">
+          <div>
+            <div class="section-kicker">Terms &amp; Payment Details</div>
+            <ol class="terms-list" contenteditable="true" data-field="termsText">
+              <li>Quotation is valid for 14 days from the issue date.</li>
+              <li>Work begins upon receipt of the kickoff advance and confirmed scope.</li>
+              <li>Third-party hosting, domain, or paid API subscriptions are billed at actuals unless listed above.</li>
+              <li>Bank / UPI: MakeIt Digital • A/C: 123456789012 • IFSC: SBIN0001234 • UPI: makeitdigital@sbi</li>
+            </ol>
+          </div>
+
+          <div class="signatory-box">
+            <div>
+              <div class="section-kicker">Authorized Signatory</div>
+              <div style="font-size:12px;" contenteditable="true" data-field="signatoryCompany">For MakeIt Digital</div>
+            </div>
+            <div class="sign-line">
+              <div style="font-weight:600; font-size:12.5px;" contenteditable="true" data-field="signatoryName">Authorized Representative</div>
+              <div style="font-size:11px; color:var(--muted);" contenteditable="true" data-field="signatoryRole">Founder / Project Lead</div>
+            </div>
+          </div>
+        </footer>
+      </article>
+    </section>
+  </main>
+
+  <!-- Preset Catalog Manager Modal -->
+  <div class="modal-backdrop" id="catalogModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <strong style="font-family:'Space Grotesk',sans-serif;">Deliverable Presets &amp; Default Prices</strong>
+        <button class="btn btn-sm" onclick="closeCatalogModal()">Close</button>
+      </div>
+      <div class="modal-body" id="catalogModalBody"></div>
+      <div style="padding:12px 18px; border-top:1px solid var(--border); display:flex; justify-content:space-between;">
+        <button class="btn btn-paper btn-sm" onclick="addCatalogPreset()">+ New Preset Item</button>
+        <button class="btn btn-lime btn-sm" onclick="closeCatalogModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'makeit_digital_quotation_v2';
+    const CATALOG_KEY = 'makeit_digital_presets_v2';
+
+    const DEFAULT_PRESETS = [
+      {
+        id: 'p1',
+        title: 'UI/UX Design & Interactive Prototype',
+        desc: 'Wireframes, design system, and high-fidelity clickable screens in Figma.',
+        unit: 'Fixed',
+        price: 25000
+      },
+      {
+        id: 'p2',
+        title: 'Responsive Website Development',
+        desc: 'Custom frontend and CMS integration optimized for speed, SEO, and mobile.',
+        unit: 'Fixed',
+        price: 45000
+      },
+      {
+        id: 'p3',
+        title: 'Full-Stack Web / Mobile App MVP',
+        desc: 'End-to-end application architecture, database, authentication, and admin dashboard.',
+        unit: 'Fixed',
+        price: 95000
+      },
+      {
+        id: 'p4',
+        title: 'Payment Gateway & API Integration',
+        desc: 'Razorpay / Stripe checkout flow, webhooks, and third-party REST API setup.',
+        unit: 'Module',
+        price: 15000
+      },
+      {
+        id: 'p5',
+        title: 'Monthly Care, Hosting & Support',
+        desc: 'Uptime monitoring, security updates, backups, and minor content edits.',
+        unit: 'Month',
+        price: 6000
+      }
+    ];
+
+    const DEFAULT_STATE = {
+      currency: 'INR|₹',
+      taxRate: 18,
+      showTax: true,
+      discountType: 'percent',
+      discountValue: 0,
+      advancePct: 50,
+      milestonePct: 30,
+      fields: {
+        companyName: 'MakeIt Digital',
+        companyTagline: 'You Idea It. We MakeIt.',
+        companyAddress: 'Websites & Apps, Designed and Built End to End<br>Kerala, India • hello@makeitdigital.in • +91 98765 43210<br>GSTIN / Tax ID: 32AABCM1234F1Z5',
+        docTitle: 'QUOTATION',
+        quoteNumber: 'QT-2026-001',
+        issueDate: '16 Nov 2026',
+        validUntil: '30 Nov 2026',
+        timeline: '4 – 6 Weeks',
+        clientName: 'Client Company / Name',
+        clientDetails: 'Attn: Project Stakeholder<br>Address Line, City, State, PIN<br>client@company.com • +91 90000 00000<br>Client Tax / GST ID: Optional',
+        projectTitle: 'Custom Web & Mobile Application Build',
+        projectSummary: 'End-to-end UI/UX design, full-stack development, responsive deployment, and post-launch handover built cleanly to specification.',
+        termsText: '<li>Quotation is valid for 14 days from the issue date.</li><li>Work begins upon receipt of the kickoff advance and confirmed scope.</li><li>Third-party hosting, domain, or paid API subscriptions are billed at actuals unless listed above.</li><li>Bank / UPI: MakeIt Digital • A/C: 123456789012 • IFSC: SBIN0001234 • UPI: makeitdigital@sbi</li>',
+        signatoryCompany: 'For MakeIt Digital',
+        signatoryName: 'Authorized Representative',
+        signatoryRole: 'Founder / Project Lead'
+      },
+      items: [
+        {
+          title: 'Discovery, Wireframes & UI/UX Design',
+          desc: 'Complete user flow mapping and responsive screen designs ready for sign-off.',
+          unit: 'Fixed',
+          qty: 1,
+          price: 25000
+        },
+        {
+          title: 'Frontend & Backend Development',
+          desc: 'Production codebase, database schema, role-based access, and responsive views.',
+          unit: 'Fixed',
+          qty: 1,
+          price: 65000
+        },
+        {
+          title: 'Testing, Deployment & Handover',
+          desc: 'QA across devices, production server launch, documentation, and team walkthrough.',
+          unit: 'Fixed',
+          qty: 1,
+          price: 10000
+        }
+      ]
+    };
+
+    let state = loadState();
+    let presets = loadPresets();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+
+    function loadPresets() {
+      try {
+        const raw = localStorage.getItem(CATALOG_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+    }
+
+    function saveAll() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(CATALOG_KEY, JSON.stringify(presets));
+        const badge = document.getElementById('saveStatus');
+        badge.textContent = 'Saved ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {}
+    }
+
+    function getCurrencySymbol() {
+      return (state.currency || 'INR|₹').split('|')[1];
+    }
+
+    function formatMoney(num) {
+      const sym = getCurrencySymbol();
+      const val = Number(num) || 0;
+      const locale = sym === '₹' ? 'en-IN' : 'en-US';
+      return sym + val.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatRawNumber(num) {
+      const val = Number(num) || 0;
+      const sym = getCurrencySymbol();
+      const locale = sym === '₹' ? 'en-IN' : 'en-US';
+      return val.toLocaleString(locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    function parseNumber(str) {
+      const cleaned = String(str).replace(/[^0-9.-]/g, '');
+      const parsed = parseFloat(cleaned);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function applyStateToDOM() {
+      document.getElementById('currencySelect').value = state.currency;
+      document.getElementById('taxRateInput').value = state.taxRate;
+      document.getElementById('showTaxToggle').checked = state.showTax;
+      document.getElementById('discountType').value = state.discountType;
+      document.getElementById('discountValue').value = state.discountValue;
+      document.getElementById('advancePct').value = state.advancePct;
+      document.getElementById('milestonePct').value = state.milestonePct;
+
+      document.querySelectorAll('[data-field]').forEach(el => {
+        const key = el.getAttribute('data-field');
+        if (state.fields[key] !== undefined) {
+          el.innerHTML = state.fields[key];
+        }
+      });
+
+      syncQuoteCode(state.fields.quoteNumber || 'QT-2026-001');
+      renderItems();
+      renderSidebarPresets();
+      recalculate();
+    }
+
+    function syncQuoteCode(val) {
+      document.getElementById('docCodeBadge').textContent = val.trim() || 'QT-2026-001';
+    }
+
+    function renderItems() {
+      const tbody = document.getElementById('itemsBody');
+      const sym = getCurrencySymbol();
+      tbody.innerHTML = '';
+
+      state.items.forEach((item, idx) => {
+        const lineTotal = (Number(item.qty) || 0) * (Number(item.price) || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="center" style="font-weight:600; color:var(--muted); padding-top:12px;">${idx + 1}</td>
+          <td>
+            <div class="item-title" contenteditable="true" onblur="updateItemField(${idx}, 'title', this.innerText)">${escapeHtml(item.title)}</div>
+            <div class="item-desc" contenteditable="true" onblur="updateItemField(${idx}, 'desc', this.innerText)">${escapeHtml(item.desc)}</div>
+          </td>
+          <td class="center">
+            <input type="text" class="cell-input center-input" value="${escapeAttr(item.unit || 'Fixed')}"
+              onchange="updateItemField(${idx}, 'unit', this.value)" />
+          </td>
+          <td class="num">
+            <input type="number" class="cell-input num-input" min="0" step="any" value="${item.qty}"
+              oninput="updateItemNumber(${idx}, 'qty', this.value)" />
+          </td>
+          <td class="num">
+            <div class="price-cell-wrap" title="Click to edit deliverable price">
+              <span class="price-prefix">${sym}</span>
+              <input type="text" value="${formatRawNumber(item.price)}"
+                onfocus="this.value = state.items[${idx}].price; this.select();"
+                oninput="updateItemPriceLive(${idx}, this.value)"
+                onblur="this.value = formatRawNumber(state.items[${idx}].price);" />
+            </div>
+          </td>
+          <td class="num">
+            <span class="line-total" id="lineTotal_${idx}">${formatMoney(lineTotal)}</span>
+          </td>
+          <td class="center no-print">
+            <div class="row-actions">
+              <button class="icon-btn" title="Duplicate row" onclick="duplicateItem(${idx})">❐</button>
+              <button class="icon-btn" title="Remove row" onclick="removeItem(${idx})">×</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateItemField(idx, field, value) {
+      state.items[idx][field] = value;
+      saveAll();
+    }
+
+    function updateItemNumber(idx, field, value) {
+      state.items[idx][field] = parseFloat(value) || 0;
+      const lineTotal = state.items[idx].qty * state.items[idx].price;
+      const el = document.getElementById(`lineTotal_${idx}`);
+      if (el) el.textContent = formatMoney(lineTotal);
+      recalculate();
+      saveAll();
+    }
+
+    function updateItemPriceLive(idx, rawVal) {
+      state.items[idx].price = parseNumber(rawVal);
+      const lineTotal = (Number(state.items[idx].qty) || 0) * state.items[idx].price;
+      const el = document.getElementById(`lineTotal_${idx}`);
+      if (el) el.textContent = formatMoney(lineTotal);
+      recalculate();
+      saveAll();
+    }
+
+    function addBlankItem() {
+      state.items.push({
+        title: 'New Deliverable Item',
+        desc: 'Describe scope, features, or output included in this deliverable.',
+        unit: 'Fixed',
+        qty: 1,
+        price: 10000
+      });
+      renderItems();
+      recalculate();
+      saveAll();
+    }
+
+    function duplicateItem(idx) {
+      const copy = JSON.parse(JSON.stringify(state.items[idx]));
+      state.items.splice(idx + 1, 0, copy);
+      renderItems();
+      recalculate();
+      saveAll();
+    }
+
+    function removeItem(idx) {
+      if (state.items.length === 1) {
+        state.items[0] = { title: 'Deliverable Item', desc: 'Scope details', unit: 'Fixed', qty: 1, price: 0 };
+      } else {
+        state.items.splice(idx, 1);
+      }
+      renderItems();
+      recalculate();
+      saveAll();
+    }
+
+    function updateSettings() {
+      state.currency = document.getElementById('currencySelect').value;
+      state.taxRate = parseFloat(document.getElementById('taxRateInput').value) || 0;
+      state.showTax = document.getElementById('showTaxToggle').checked;
+      state.discountType = document.getElementById('discountType').value;
+      state.discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
+      state.advancePct = Math.max(0, Math.min(100, parseFloat(document.getElementById('advancePct').value) || 0));
+      state.milestonePct = Math.max(0, Math.min(100 - state.advancePct, parseFloat(document.getElementById('milestonePct').value) || 0));
+
+      renderItems();
+      renderSidebarPresets();
+      recalculate();
+      saveAll();
+    }
+
+    function recalculate() {
+      const subtotal = state.items.reduce((sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.price) || 0)), 0);
+
+      let discount = 0;
+      if (state.discountValue > 0) {
+        discount = state.discountType === 'percent'
+          ? subtotal * (state.discountValue / 100)
+          : state.discountValue;
+      }
+      discount = Math.min(subtotal, discount);
+
+      const discountedSubtotal = Math.max(0, subtotal - discount);
+      const tax = state.showTax ? discountedSubtotal * (state.taxRate / 100) : 0;
+      const grandTotal = discountedSubtotal + tax;
+
+      document.getElementById('subtotalAmt').textContent = formatMoney(subtotal);
+
+      const discountRow = document.getElementById('discountRow');
+      if (discount > 0) {
+        discountRow.style.display = '';
+        document.getElementById('discountLabel').textContent =
+          state.discountType === 'percent' ? `Discount (${state.discountValue}%)` : 'Discount';
+        document.getElementById('discountAmt').textContent = '-' + formatMoney(discount);
+      } else {
+        discountRow.style.display = 'none';
+      }
+
+      const taxRow = document.getElementById('taxRow');
+      if (state.showTax) {
+        taxRow.style.display = '';
+        document.getElementById('taxLabel').textContent = `GST / Tax (${state.taxRate}%)`;
+        document.getElementById('taxAmt').textContent = formatMoney(tax);
+      } else {
+        taxRow.style.display = 'none';
+      }
+
+      document.getElementById('grandTotalAmt').textContent = formatMoney(grandTotal);
+
+      // Milestones
+      const adv = state.advancePct;
+      const mid = state.milestonePct;
+      const fin = Math.max(0, 100 - adv - mid);
+
+      document.getElementById('finalPctLabel').textContent = fin + '%';
+      const advEl = document.getElementById('advPctText');
+      const midEl = document.getElementById('midPctText');
+      const finEl = document.getElementById('finPctText');
+      if (advEl) advEl.textContent = adv;
+      if (midEl) midEl.textContent = mid;
+      if (finEl) finEl.textContent = fin;
+
+      document.getElementById('milestone1Amt').textContent = formatMoney(grandTotal * (adv / 100));
+      document.getElementById('milestone2Amt').textContent = formatMoney(grandTotal * (mid / 100));
+      document.getElementById('milestone3Amt').textContent = formatMoney(grandTotal * (fin / 100));
+    }
+
+    /* Sidebar Presets & Catalog Manager */
+    function renderSidebarPresets() {
+      const container = document.getElementById('presetSidebarList');
+      const sym = getCurrencySymbol();
+      container.innerHTML = '';
+
+      presets.forEach((p, idx) => {
+        const div = document.createElement('div');
+        div.className = 'preset-item';
+        div.innerHTML = `
+          <div class="preset-info">
+            <div class="preset-name" title="${escapeAttr(p.title)}">${escapeHtml(p.title)}</div>
+            <div class="preset-price-edit">
+              <span>${sym}</span>
+              <input type="number" min="0" step="any" value="${p.price}"
+                onchange="updatePresetPrice(${idx}, this.value)" title="Edit preset price" />
+              <span>/ ${escapeHtml(p.unit)}</span>
+            </div>
+          </div>
+          <button class="btn btn-paper btn-sm" onclick="insertPreset(${idx})">+ Add</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updatePresetPrice(idx, val) {
+      presets[idx].price = parseFloat(val) || 0;
+      saveAll();
+    }
+
+    function insertPreset(idx) {
+      const p = presets[idx];
+      state.items.push({
+        title: p.title,
+        desc: p.desc,
+        unit: p.unit || 'Fixed',
+        qty: 1,
+        price: Number(p.price) || 0
+      });
+      renderItems();
+      recalculate();
+      saveAll();
+    }
+
+    function openCatalogModal() {
+      renderCatalogModal();
+      document.getElementById('catalogModal').classList.add('open');
+    }
+
+    function closeCatalogModal() {
+      document.getElementById('catalogModal').classList.remove('open');
+      renderSidebarPresets();
+      saveAll();
+    }
+
+    function renderCatalogModal() {
+      const body = document.getElementById('catalogModalBody');
+      body.innerHTML = '';
+      presets.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'catalog-row';
+        row.innerHTML = `
+          <input type="text" value="${escapeAttr(p.title)}" placeholder="Deliverable Title"
+            oninput="presets[${idx}].title = this.value" />
+          <input type="text" value="${escapeAttr(p.unit)}" placeholder="Unit"
+            oninput="presets[${idx}].unit = this.value" />
+          <input type="number" min="0" step="any" value="${p.price}" placeholder="Price"
+            oninput="presets[${idx}].price = parseFloat(this.value) || 0" />
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-paper btn-sm" onclick="insertPreset(${idx})">+ Quote</button>
+            <button class="icon-btn" title="Delete preset" onclick="deletePreset(${idx})">×</button>
+          </div>
+          <textarea placeholder="Deliverable description" oninput="presets[${idx}].desc = this.value">${escapeHtml(p.desc)}</textarea>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    function addCatalogPreset() {
+      presets.push({
+        id: 'p_' + Date.now(),
+        title: 'Custom Service Deliverable',
+        desc: 'Scope and deliverables included.',
+        unit: 'Fixed',
+        price: 15000
+      });
+      renderCatalogModal();
+      saveAll();
+    }
+
+    function deletePreset(idx) {
+      presets.splice(idx, 1);
+      renderCatalogModal();
+      saveAll();
+    }
+
+    /* Save contenteditable fields on blur/input */
+    document.addEventListener('input', (e) => {
+      const target = e.target;
+      if (target && target.hasAttribute('data-field')) {
+        state.fields[target.getAttribute('data-field')] = target.innerHTML;
+        saveAll();
+      }
+    });
+
+    function createNewQuotation() {
+      const nextNum = 'QT-' + new Date().getFullYear() + '-' + String(Math.floor(100 + Math.random() * 900));
+      state.fields.quoteNumber = nextNum;
+      state.fields.issueDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      state.fields.clientName = 'Client Company / Name';
+      state.fields.clientDetails = 'Attn: Contact Person<br>City, State<br>email@client.com • +91 00000 00000';
+      state.items = [
+        { title: 'Deliverable 1', desc: 'Scope details and specifications.', unit: 'Fixed', qty: 1, price: 20000 }
+      ];
+      applyStateToDOM();
+      saveAll();
+    }
+
+    function resetToDefault() {
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      presets = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+      applyStateToDOM();
+      saveAll();
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify({ state, presets }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${(state.fields.quoteNumber || 'quotation').replace(/\s+/g, '_')}.json`;
+      a.click();
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.state) state = data.state;
+          if (data.presets) presets = data.presets;
+          applyStateToDOM();
+          saveAll();
+        } catch (err) {
+          alert('Invalid JSON quotation file.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function escapeAttr(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    applyStateToDOM();
+  </script>
+</body>
+</html>
